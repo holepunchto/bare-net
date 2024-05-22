@@ -270,7 +270,7 @@ const Server = exports.Server = class NetServer extends EventEmitter {
   }
 
   _onconnection (socket) {
-    this.emit('connection', new Socket()._attach(this._type, socket))
+    this.emit('connection', new Socket(this._opts)._attach(this._type, socket))
   }
 
   _onerror (err) {
