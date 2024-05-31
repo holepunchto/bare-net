@@ -25,7 +25,7 @@
   "dependencies": {
     "bare-events": "^2.2.2",
     "bare-pipe": "^3.2.0",
-    "bare-stream": "^1.0.0",
+    "bare-stream": "^2.0.0",
     "bare-tcp": "^1.4.0"
   },
   "devDependencies": {

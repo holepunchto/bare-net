@@ -17,7 +17,7 @@ const constants = exports.constants = {
 
 const Socket = exports.Socket = class NetSocket extends Duplex {
   constructor (opts = {}) {
-    super({ mapWritable, eagerOpen: true })
+    super({ eagerOpen: true })
 
     const {
       readBufferSize = defaultReadBufferSize,
@@ -105,7 +105,7 @@ const Socket = exports.Socket = class NetSocket extends Duplex {
     return this
   }
 
-  _write (data, cb) {
+  _write (data, encoding, cb) {
     if (this._socket !== null && this._socket.write(data)) cb(null)
     else this._pendingWrite = cb
   }
@@ -315,8 +315,4 @@ exports.createConnection = function createConnection (...args) {
 
 exports.createServer = function createServer (opts, onconnection) {
   return new Server(opts, onconnection)
-}
-
-function mapWritable (buf) {
-  return typeof buf === 'string' ? Buffer.from(buf) : buf
 }
