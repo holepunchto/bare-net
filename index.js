@@ -5,7 +5,7 @@ const pipe = require('bare-pipe')
 
 const defaultReadBufferSize = 65536
 
-const constants = exports.constants = {
+const constants = (exports.constants = {
   type: {
     TCP: 1,
     IPC: 2
@@ -13,16 +13,14 @@ const constants = exports.constants = {
   state: {
     UNREFED: 0x1
   }
-}
+})
 
-const Socket = exports.Socket = class NetSocket extends Duplex {
-  constructor (opts = {}) {
+exports.Socket = class NetSocket extends Duplex {
+  constructor(opts = {}) {
     super({ eagerOpen: true })
 
-    const {
-      readBufferSize = defaultReadBufferSize,
-      allowHalfOpen = true
-    } = opts
+    const { readBufferSize = defaultReadBufferSize, allowHalfOpen = true } =
+      opts
 
     this._opts = { readBufferSize, allowHalfOpen }
     this._type = 0
@@ -33,15 +31,15 @@ const Socket = exports.Socket = class NetSocket extends Duplex {
     this._pendingFinal = null
   }
 
-  get connecting () {
+  get connecting() {
     return this._socket !== null && this._socket.connecting
   }
 
-  get pending () {
+  get pending() {
     return this._socket === null || this._socket.pending
   }
 
-  connect (...args) {
+  connect(...args) {
     let opts = {}
     let onconnect
 
@@ -49,7 +47,7 @@ const Socket = exports.Socket = class NetSocket extends Duplex {
     if (typeof args[0] === 'string') {
       opts.path = args[0]
       onconnect = args[1]
-    // connect(port[, host][, onconnect])
+      // connect(port[, host][, onconnect])
     } else if (typeof args[0] === 'number') {
       opts.port = args[0]
 
@@ -59,7 +57,7 @@ const Socket = exports.Socket = class NetSocket extends Duplex {
         opts.host = args[1]
         onconnect = args[2]
       }
-    // connect(opts[, onconnect])
+      // connect(opts[, onconnect])
     } else {
       opts = args[0] || {}
       onconnect = args[1]
@@ -78,17 +76,17 @@ const Socket = exports.Socket = class NetSocket extends Duplex {
     return this
   }
 
-  ref () {
+  ref() {
     this._state &= ~constants.state.UNREFED
     if (this._socket !== null) this._socket.ref()
   }
 
-  unref () {
+  unref() {
     this._state |= constants.state.UNREFED
     if (this._socket !== null) this._socket.unref()
   }
 
-  _attach (type, socket) {
+  _attach(type, socket) {
     this._type = type
     this._socket = socket
 
@@ -105,48 +103,48 @@ const Socket = exports.Socket = class NetSocket extends Duplex {
     return this
   }
 
-  _write (data, encoding, cb) {
+  _write(data, encoding, cb) {
     if (this._socket !== null && this._socket.write(data)) cb(null)
     else this._pendingWrite = cb
   }
 
-  _final (cb) {
+  _final(cb) {
     if (this._socket === null) return cb(null)
     this._pendingFinal = cb
     this._socket.end()
   }
 
-  _predestroy () {
+  _predestroy() {
     if (this._socket === null) return
     this._socket.destroy()
   }
 
-  _onconnect () {
+  _onconnect() {
     this._ondrain() // Flush any pending writes
 
     this.emit('connect')
   }
 
-  _onerror (err) {
+  _onerror(err) {
     this.destroy(err)
   }
 
-  _onend () {
+  _onend() {
     if (this._pendingFinal === null) return
     const cb = this._pendingFinal
     this._pendingFinal = null
     cb(null)
   }
 
-  _onclose () {
+  _onclose() {
     this.push(null)
   }
 
-  _ondata (data) {
+  _ondata(data) {
     this.push(data)
   }
 
-  _ondrain () {
+  _ondrain() {
     if (this._pendingWrite === null) return
     const cb = this._pendingWrite
     this._pendingWrite = null
@@ -154,8 +152,8 @@ const Socket = exports.Socket = class NetSocket extends Duplex {
   }
 }
 
-const Server = exports.Server = class NetServer extends EventEmitter {
-  constructor (opts = {}, onconnection) {
+exports.Server = class NetServer extends EventEmitter {
+  constructor(opts = {}, onconnection) {
     if (typeof opts === 'function') {
       onconnection = opts
       opts = {}
@@ -163,10 +161,8 @@ const Server = exports.Server = class NetServer extends EventEmitter {
 
     super()
 
-    const {
-      readBufferSize = defaultReadBufferSize,
-      allowHalfOpen = true
-    } = opts
+    const { readBufferSize = defaultReadBufferSize, allowHalfOpen = true } =
+      opts
 
     this._opts = { readBufferSize, allowHalfOpen }
     this._type = 0
@@ -176,15 +172,15 @@ const Server = exports.Server = class NetServer extends EventEmitter {
     if (onconnection) this.on('connection', onconnection)
   }
 
-  get listening () {
+  get listening() {
     return this._server !== null && this._server.listening
   }
 
-  address () {
+  address() {
     return this._server === null ? null : this._server.address()
   }
 
-  listen (...args) {
+  listen(...args) {
     let opts = {}
     let onlistening
 
@@ -198,7 +194,7 @@ const Server = exports.Server = class NetServer extends EventEmitter {
         opts.backlog = args[1]
         onlistening = args[2]
       }
-    // listen([port[, host[, backlog]]][, onlistening])
+      // listen([port[, host[, backlog]]][, onlistening])
     } else {
       if (typeof args[0] === 'function') {
         onlistening = args[0]
@@ -235,22 +231,22 @@ const Server = exports.Server = class NetServer extends EventEmitter {
     return this
   }
 
-  close (onclose) {
+  close(onclose) {
     if (onclose) this.once('close', onclose)
     this._server.close()
   }
 
-  ref () {
+  ref() {
     this._state &= ~constants.state.UNREFED
     if (this._server !== null) this._server.ref()
   }
 
-  unref () {
+  unref() {
     this._state |= constants.state.UNREFED
     if (this._server !== null) this._server.unref()
   }
 
-  _attach (type, server) {
+  _attach(type, server) {
     this._type = type
     this._server = server
 
@@ -265,19 +261,22 @@ const Server = exports.Server = class NetServer extends EventEmitter {
     return this
   }
 
-  _onlistening () {
+  _onlistening() {
     this.emit('listening')
   }
 
-  _onconnection (socket) {
-    this.emit('connection', new Socket(this._opts)._attach(this._type, socket))
+  _onconnection(socket) {
+    this.emit(
+      'connection',
+      new exports.Socket(this._opts)._attach(this._type, socket)
+    )
   }
 
-  _onerror (err) {
+  _onerror(err) {
     this.emit('error', err)
   }
 
-  _onclose () {
+  _onclose() {
     this.emit('close')
   }
 }
@@ -286,7 +285,7 @@ exports.isIP = tcp.isIP
 exports.isIPv4 = tcp.isIPv4
 exports.isIPv6 = tcp.isIPv6
 
-exports.createConnection = function createConnection (...args) {
+exports.createConnection = function createConnection(...args) {
   let opts = {}
   let onconnect
 
@@ -294,7 +293,7 @@ exports.createConnection = function createConnection (...args) {
   if (typeof args[0] === 'string') {
     opts.path = args[0]
     onconnect = args[1]
-  // createConnection(port[, host][, onconnect])
+    // createConnection(port[, host][, onconnect])
   } else if (typeof args[0] === 'number') {
     opts.port = args[0]
 
@@ -304,15 +303,15 @@ exports.createConnection = function createConnection (...args) {
       opts.host = args[1]
       onconnect = args[2]
     }
-  // createConnection(opts[, onconnect])
+    // createConnection(opts[, onconnect])
   } else {
     opts = args[0] || {}
     onconnect = args[1]
   }
 
-  return new Socket(opts).connect(opts, onconnect)
+  return new exports.Socket(opts).connect(opts, onconnect)
 }
 
-exports.createServer = function createServer (opts, onconnection) {
-  return new Server(opts, onconnection)
+exports.createServer = function createServer(opts, onconnection) {
+  return new exports.Server(opts, onconnection)
 }

@@ -11,7 +11,9 @@ test('tcp', (t) => {
     t.ok(socket instanceof net.Socket)
 
     socket
-      .on('data', (data) => t.alike(data, Buffer.from('hello client'), 'server received data'))
+      .on('data', (data) =>
+        t.alike(data, Buffer.from('hello client'), 'server received data')
+      )
       .on('close', () => {
         t.pass('server socket closed')
         server.close(() => t.pass('server closed'))
@@ -24,7 +26,9 @@ test('tcp', (t) => {
 
     const socket = new net.Socket()
     socket
-      .on('data', (data) => t.alike(data, Buffer.from('hello server'), 'client received data'))
+      .on('data', (data) =>
+        t.alike(data, Buffer.from('hello server'), 'client received data')
+      )
       .on('close', () => t.pass('client socket closed'))
       .connect(server.address().port, () => {
         t.pass('connected')
@@ -40,7 +44,9 @@ test('ipc', (t) => {
     t.ok(socket instanceof net.Socket)
 
     socket
-      .on('data', (data) => t.alike(data, Buffer.from('hello client'), 'server received data'))
+      .on('data', (data) =>
+        t.alike(data, Buffer.from('hello client'), 'server received data')
+      )
       .on('close', () => {
         t.pass('server socket closed')
         server.close(() => t.pass('server closed'))
@@ -53,7 +59,9 @@ test('ipc', (t) => {
 
     const socket = new net.Socket()
     socket
-      .on('data', (data) => t.alike(data, Buffer.from('hello server'), 'client received data'))
+      .on('data', (data) =>
+        t.alike(data, Buffer.from('hello server'), 'client received data')
+      )
       .on('close', () => t.pass('client socket closed'))
       .connect(server.address(), () => {
         t.pass('connected')
@@ -62,9 +70,10 @@ test('ipc', (t) => {
   })
 })
 
-function name () {
-  const name = 'bare-pipe-' + Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2)
-  return isWindows
-    ? '\\\\.\\pipe\\' + name
-    : '/tmp/' + name + '.sock'
+function name() {
+  const name =
+    'bare-pipe-' +
+    Math.random().toString(16).slice(2) +
+    Math.random().toString(16).slice(2)
+  return isWindows ? '\\\\.\\pipe\\' + name : '/tmp/' + name + '.sock'
 }

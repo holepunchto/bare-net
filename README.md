@@ -8,7 +8,7 @@ npm i bare-net
 
 ## Usage
 
-``` js
+```js
 const net = require('bare-net')
 
 const server = net.createServer()
