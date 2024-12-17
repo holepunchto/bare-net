@@ -312,6 +312,9 @@ exports.createConnection = function createConnection(...args) {
   return new exports.Socket(opts).connect(opts, onconnect)
 }
 
+// For Node.js compatibility
+exports.connect = exports.createConnection
+
 exports.createServer = function createServer(opts, onconnection) {
   return new exports.Server(opts, onconnection)
 }
