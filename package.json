@@ -1,6 +1,6 @@
 {
   "name": "bare-net",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "TCP and IPC servers and clients for JavaScript",
   "exports": {
     ".": "./index.js",
