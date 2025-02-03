@@ -2,7 +2,7 @@ import EventEmitter, { EventMap } from 'bare-events'
 import { Duplex, DuplexEvents } from 'bare-stream'
 import {
   Pipe,
-  Server as PipeServer,
+  PipeServer,
   createConnection as createPipeConnection,
   createServer as createPipeServer
 } from 'bare-pipe'
@@ -15,22 +15,20 @@ import {
   isIPv4,
   isIPv6
 } from 'bare-tcp'
+import constants from './lib/constants'
 
-declare const constants: {
-  type: { TCP: 1; IPC: 2 }
-  state: { UNREFED: number }
-}
+export { constants, isIP, isIPv4, isIPv6 }
 
-interface NetOptions {
+export interface NetOptions {
   allowHalfOpen?: boolean
   readBufferSize?: number
 }
 
-interface NetSocketEvents extends DuplexEvents {
+export interface NetSocketEvents extends DuplexEvents {
   connect: []
 }
 
-declare interface NetSocket<M extends NetSocketEvents = NetSocketEvents>
+interface NetSocket<M extends NetSocketEvents = NetSocketEvents>
   extends Duplex<M> {
   readonly connecting: boolean
   readonly pending: boolean
@@ -45,14 +43,16 @@ declare class NetSocket {
   constructor(opts?: NetOptions)
 }
 
-interface NetServerEvents extends EventMap {
+export { type NetSocket, NetSocket as Socket }
+
+export interface NetServerEvents extends EventMap {
   close: []
   connection: [socket: NetSocket]
   error: [err: Error]
   listening: []
 }
 
-declare interface NetServer<M extends NetServerEvents = NetServerEvents>
+interface NetServer<M extends NetServerEvents = NetServerEvents>
   extends EventEmitter<M> {
   readonly listening: boolean
 
@@ -71,30 +71,14 @@ declare class NetServer {
   constructor(onconnection: (socket: NetSocket) => void)
 }
 
-declare function createConnection(
+export { type NetServer, NetServer as Server }
+
+export function createConnection(
   ...args: Parameters<typeof createPipeConnection & typeof createTCPConnection>
 ): NetSocket
 
-declare function createServer(
+export { createConnection as conntect }
+
+export function createServer(
   ...args: Parameters<typeof createPipeServer & typeof createTCPServer>
 ): NetServer
-
-export {
-  constants,
-  NetSocket as Socket,
-  NetServer as Server,
-  isIP,
-  isIPv4,
-  isIPv6,
-  createConnection,
-  createConnection as connect,
-  createServer
-}
-
-export type {
-  NetOptions,
-  NetSocketEvents,
-  NetSocket,
-  NetServerEvents,
-  NetServer
-}
