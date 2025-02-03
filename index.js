@@ -2,18 +2,11 @@ const EventEmitter = require('bare-events')
 const { Duplex } = require('bare-stream')
 const tcp = require('bare-tcp')
 const pipe = require('bare-pipe')
+const constants = require('./lib/constants')
 
 const defaultReadBufferSize = 65536
 
-const constants = (exports.constants = {
-  type: {
-    TCP: 1,
-    IPC: 2
-  },
-  state: {
-    UNREFED: 0x1
-  }
-})
+exports.constants = constants
 
 exports.Socket = class NetSocket extends Duplex {
   constructor(opts = {}) {

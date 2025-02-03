@@ -3,11 +3,20 @@
   "version": "2.0.1",
   "description": "TCP and IPC servers and clients for JavaScript",
   "exports": {
-    ".": "./index.js",
-    "./package": "./package.json"
+    "./package": "./package.json",
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./constants": {
+      "types": "./lib/constants.d.ts",
+      "default": "./lib/constants.js"
+    }
   },
   "files": [
-    "index.js"
+    "index.js",
+    "index.d.ts",
+    "lib"
   ],
   "scripts": {
     "test": "prettier . --check && bare test.js"
