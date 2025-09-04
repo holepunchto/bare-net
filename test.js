@@ -1,11 +1,10 @@
-/* global Bare */
 const test = require('brittle')
 const net = require('.')
 
 const isWindows = Bare.platform === 'win32'
 
 test('tcp', (t) => {
-  t.plan(8)
+  t.plan(10)
 
   const server = net.createServer((socket) => {
     t.ok(socket instanceof net.Socket)
@@ -14,6 +13,7 @@ test('tcp', (t) => {
       .on('data', (data) =>
         t.alike(data, Buffer.from('hello client'), 'server received data')
       )
+      .on('end', () => t.pass('server socket ended'))
       .on('close', () => {
         t.pass('server socket closed')
         server.close(() => t.pass('server closed'))
@@ -29,6 +29,7 @@ test('tcp', (t) => {
       .on('data', (data) =>
         t.alike(data, Buffer.from('hello server'), 'client received data')
       )
+      .on('end', () => t.pass('client socket ended'))
       .on('close', () => t.pass('client socket closed'))
       .connect(server.address().port, () => {
         t.pass('connected')
@@ -38,7 +39,7 @@ test('tcp', (t) => {
 })
 
 test('ipc', (t) => {
-  t.plan(8)
+  t.plan(10)
 
   const server = net.createServer((socket) => {
     t.ok(socket instanceof net.Socket)
@@ -47,6 +48,7 @@ test('ipc', (t) => {
       .on('data', (data) =>
         t.alike(data, Buffer.from('hello client'), 'server received data')
       )
+      .on('end', () => t.pass('server socket ended'))
       .on('close', () => {
         t.pass('server socket closed')
         server.close(() => t.pass('server closed'))
@@ -62,6 +64,7 @@ test('ipc', (t) => {
       .on('data', (data) =>
         t.alike(data, Buffer.from('hello server'), 'client received data')
       )
+      .on('end', () => t.pass('client socket ended'))
       .on('close', () => t.pass('client socket closed'))
       .connect(server.address(), () => {
         t.pass('connected')

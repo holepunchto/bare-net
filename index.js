@@ -123,6 +123,7 @@ exports.Socket = class NetSocket extends Duplex {
   }
 
   _onend() {
+    this.end()
     if (this._pendingFinal === null) return
     const cb = this._pendingFinal
     this._pendingFinal = null
