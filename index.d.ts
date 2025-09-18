@@ -32,11 +32,19 @@ interface NetSocket<M extends NetSocketEvents = NetSocketEvents>
   extends Duplex<M> {
   readonly connecting: boolean
   readonly pending: boolean
+  readonly timeout?: number
 
   connect: Pipe['connect'] & TCPSocket['connect']
 
-  ref(): void
-  unref(): void
+  setKeepAlive(enable?: boolean, delay?: number): this
+  setKeepAlive(delay: number): this
+
+  setNoDelay(enable?: boolean): this
+
+  setTimeout(ms: number, ontimeout?: () => void): this
+
+  ref(): this
+  unref(): this
 }
 
 declare class NetSocket {
@@ -62,8 +70,8 @@ interface NetServer<M extends NetServerEvents = NetServerEvents>
 
   close(onclose: () => void): void
 
-  ref(): void
-  unref(): void
+  ref(): this
+  unref(): this
 }
 
 declare class NetServer {

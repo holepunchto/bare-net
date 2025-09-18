@@ -32,6 +32,10 @@ exports.Socket = class NetSocket extends Duplex {
     return this._socket === null || this._socket.pending
   }
 
+  get timeout() {
+    return this._socket === null ? undefined : this._socket.timeout
+  }
+
   connect(...args) {
     let opts = {}
     let onconnect
@@ -69,14 +73,31 @@ exports.Socket = class NetSocket extends Duplex {
     return this
   }
 
+  setKeepAlive(...args) {
+    if (this._socket !== null) this._socket.setKeepAlive(...args)
+    return this
+  }
+
+  setNoDelay(...args) {
+    if (this._socket !== null) this._socket.setNoDelay(...args)
+    return this
+  }
+
+  setTimeout(...args) {
+    if (this._socket !== null) this._socket.setTimeout(...args)
+    return this
+  }
+
   ref() {
     this._state &= ~constants.state.UNREFED
     if (this._socket !== null) this._socket.ref()
+    return this
   }
 
   unref() {
     this._state |= constants.state.UNREFED
     if (this._socket !== null) this._socket.unref()
+    return this
   }
 
   _attach(type, socket) {
