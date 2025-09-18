@@ -111,6 +111,7 @@ exports.Socket = class NetSocket extends Duplex {
       .on('end', this._onend.bind(this))
       .on('data', this._ondata.bind(this))
       .on('drain', this._ondrain.bind(this))
+      .on('timeout', this._ontimeout.bind(this))
 
     if (this._state & constants.state.UNREFED) this._socket.unref()
 
@@ -164,6 +165,10 @@ exports.Socket = class NetSocket extends Duplex {
     const cb = this._pendingWrite
     this._pendingWrite = null
     cb(null)
+  }
+
+  _ontimeout() {
+    this.emit('timeout')
   }
 }
 
