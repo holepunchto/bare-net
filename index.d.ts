@@ -21,6 +21,7 @@ export { constants, isIP, isIPv4, isIPv6 }
 
 export interface NetOptions {
   allowHalfOpen?: boolean
+  eagerOpen?: boolean
   readBufferSize?: number
 }
 
@@ -33,6 +34,7 @@ interface NetSocket<M extends NetSocketEvents = NetSocketEvents>
   readonly connecting: boolean
   readonly pending: boolean
   readonly timeout?: number
+  readonly readyState: 'open' | 'readOnly' | 'writeOnly' | 'opening'
 
   connect: Pipe['connect'] & TCPSocket['connect']
 
@@ -68,7 +70,7 @@ interface NetServer<M extends NetServerEvents = NetServerEvents>
 
   listen: PipeServer['listen'] & TCPServer['listen']
 
-  close(onclose: () => void): void
+  close(onclose: (err?: Error) => void): this
 
   ref(): this
   unref(): this
@@ -85,7 +87,7 @@ export function createConnection(
   ...args: Parameters<typeof createPipeConnection & typeof createTCPConnection>
 ): NetSocket
 
-export { createConnection as conntect }
+export { createConnection as connect }
 
 export function createServer(
   ...args: Parameters<typeof createPipeServer & typeof createTCPServer>

@@ -6,19 +6,21 @@ const constants = require('./lib/constants')
 
 const defaultReadBufferSize = 65536
 
-exports.constants = constants
-
 exports.Socket = class NetSocket extends Duplex {
   constructor(opts = {}) {
-    super({ eagerOpen: true })
+    const {
+      readBufferSize = defaultReadBufferSize,
+      allowHalfOpen = true,
+      eagerOpen = false
+    } = opts
 
-    const { readBufferSize = defaultReadBufferSize, allowHalfOpen = true } =
-      opts
+    super({ eagerOpen })
 
-    this._opts = { readBufferSize, allowHalfOpen }
     this._type = 0
     this._state = 0
     this._socket = null
+
+    this._opts = { readBufferSize, allowHalfOpen, eagerOpen }
 
     this._pendingWrite = null
     this._pendingFinal = null
@@ -36,16 +38,20 @@ exports.Socket = class NetSocket extends Duplex {
     return this._socket === null ? undefined : this._socket.timeout
   }
 
+  get readyState() {
+    return this._socket === null ? 'opening' : this._socket.readyState
+  }
+
   connect(...args) {
     let opts = {}
     let onconnect
 
-    // connect(path[, onconnect])
     if (typeof args[0] === 'string') {
+      // connect(path[, onconnect])
       opts.path = args[0]
       onconnect = args[1]
-      // connect(port[, host][, onconnect])
     } else if (typeof args[0] === 'number') {
+      // connect(port[, host][, onconnect])
       opts.port = args[0]
 
       if (typeof args[1] === 'function') {
@@ -54,8 +60,8 @@ exports.Socket = class NetSocket extends Duplex {
         opts.host = args[1]
         onconnect = args[2]
       }
-      // connect(opts[, onconnect])
     } else {
+      // connect(opts[, onconnect])
       opts = args[0] || {}
       onconnect = args[1]
     }
@@ -181,13 +187,17 @@ exports.Server = class NetServer extends EventEmitter {
 
     super()
 
-    const { readBufferSize = defaultReadBufferSize, allowHalfOpen = true } =
-      opts
+    const {
+      readBufferSize = defaultReadBufferSize,
+      allowHalfOpen = true,
+      pauseOnConnect = false
+    } = opts
 
-    this._opts = { readBufferSize, allowHalfOpen }
     this._type = 0
     this._state = 0
     this._server = null
+
+    this._opts = { readBufferSize, allowHalfOpen, pauseOnConnect }
 
     if (onconnection) this.on('connection', onconnection)
   }
@@ -204,8 +214,8 @@ exports.Server = class NetServer extends EventEmitter {
     let opts = {}
     let onlistening
 
-    // listen(path[, backlog][, onlistening])
     if (typeof args[0] === 'string') {
+      // listen(path[, backlog][, onlistening])
       opts.path = args[0]
 
       if (typeof args[1] === 'function') {
@@ -214,8 +224,8 @@ exports.Server = class NetServer extends EventEmitter {
         opts.backlog = args[1]
         onlistening = args[2]
       }
-      // listen([port[, host[, backlog]]][, onlistening])
     } else {
+      // listen([port[, host[, backlog]]][, onlistening])
       if (typeof args[0] === 'function') {
         onlistening = args[0]
       } else {
@@ -254,16 +264,19 @@ exports.Server = class NetServer extends EventEmitter {
   close(onclose) {
     if (onclose) this.once('close', onclose)
     this._server.close()
+    return this
   }
 
   ref() {
     this._state &= ~constants.state.UNREFED
     if (this._server !== null) this._server.ref()
+    return this
   }
 
   unref() {
     this._state |= constants.state.UNREFED
     if (this._server !== null) this._server.unref()
+    return this
   }
 
   _attach(type, server) {
@@ -301,6 +314,8 @@ exports.Server = class NetServer extends EventEmitter {
   }
 }
 
+exports.constants = constants
+
 exports.isIP = tcp.isIP
 exports.isIPv4 = tcp.isIPv4
 exports.isIPv6 = tcp.isIPv6
@@ -309,12 +324,12 @@ exports.createConnection = function createConnection(...args) {
   let opts = {}
   let onconnect
 
-  // createConnection(path[, onconnect])
   if (typeof args[0] === 'string') {
+    // createConnection(path[, onconnect])
     opts.path = args[0]
     onconnect = args[1]
-    // createConnection(port[, host][, onconnect])
   } else if (typeof args[0] === 'number') {
+    // createConnection(port[, host][, onconnect])
     opts.port = args[0]
 
     if (typeof args[1] === 'function') {
@@ -323,8 +338,8 @@ exports.createConnection = function createConnection(...args) {
       opts.host = args[1]
       onconnect = args[2]
     }
-    // createConnection(opts[, onconnect])
   } else {
+    // createConnection(opts[, onconnect])
     opts = args[0] || {}
     onconnect = args[1]
   }
