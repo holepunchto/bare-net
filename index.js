@@ -8,11 +8,7 @@ const defaultReadBufferSize = 65536
 
 exports.Socket = class NetSocket extends Duplex {
   constructor(opts = {}) {
-    const {
-      readBufferSize = defaultReadBufferSize,
-      allowHalfOpen = true,
-      eagerOpen = false
-    } = opts
+    const { readBufferSize = defaultReadBufferSize, allowHalfOpen = true, eagerOpen = false } = opts
 
     super({ eagerOpen })
 
@@ -299,10 +295,7 @@ exports.Server = class NetServer extends EventEmitter {
   }
 
   _onconnection(socket) {
-    this.emit(
-      'connection',
-      new exports.Socket(this._opts)._attach(this._type, socket)
-    )
+    this.emit('connection', new exports.Socket(this._opts)._attach(this._type, socket))
   }
 
   _onerror(err) {
