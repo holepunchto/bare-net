@@ -10,9 +10,7 @@ test('tcp', (t) => {
     t.ok(socket instanceof net.Socket)
 
     socket
-      .on('data', (data) =>
-        t.alike(data, Buffer.from('hello client'), 'server received data')
-      )
+      .on('data', (data) => t.alike(data, Buffer.from('hello client'), 'server received data'))
       .on('end', () => t.pass('server socket ended'))
       .on('close', () => {
         t.pass('server socket closed')
@@ -26,9 +24,7 @@ test('tcp', (t) => {
 
     const socket = new net.Socket()
     socket
-      .on('data', (data) =>
-        t.alike(data, Buffer.from('hello server'), 'client received data')
-      )
+      .on('data', (data) => t.alike(data, Buffer.from('hello server'), 'client received data'))
       .on('end', () => t.pass('client socket ended'))
       .on('close', () => t.pass('client socket closed'))
       .connect(server.address().port, () => {
@@ -45,9 +41,7 @@ test('ipc', (t) => {
     t.ok(socket instanceof net.Socket)
 
     socket
-      .on('data', (data) =>
-        t.alike(data, Buffer.from('hello client'), 'server received data')
-      )
+      .on('data', (data) => t.alike(data, Buffer.from('hello client'), 'server received data'))
       .on('end', () => t.pass('server socket ended'))
       .on('close', () => {
         t.pass('server socket closed')
@@ -61,9 +55,7 @@ test('ipc', (t) => {
 
     const socket = new net.Socket()
     socket
-      .on('data', (data) =>
-        t.alike(data, Buffer.from('hello server'), 'client received data')
-      )
+      .on('data', (data) => t.alike(data, Buffer.from('hello server'), 'client received data'))
       .on('end', () => t.pass('client socket ended'))
       .on('close', () => t.pass('client socket closed'))
       .connect(server.address(), () => {
@@ -75,8 +67,6 @@ test('ipc', (t) => {
 
 function name() {
   const name =
-    'bare-pipe-' +
-    Math.random().toString(16).slice(2) +
-    Math.random().toString(16).slice(2)
+    'bare-pipe-' + Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2)
   return isWindows ? '\\\\.\\pipe\\' + name : '/tmp/' + name + '.sock'
 }

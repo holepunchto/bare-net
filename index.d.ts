@@ -29,8 +29,7 @@ export interface NetSocketEvents extends DuplexEvents {
   connect: []
 }
 
-interface NetSocket<M extends NetSocketEvents = NetSocketEvents>
-  extends Duplex<M> {
+interface NetSocket<M extends NetSocketEvents = NetSocketEvents> extends Duplex<M> {
   readonly connecting: boolean
   readonly pending: boolean
   readonly timeout?: number
@@ -62,8 +61,7 @@ export interface NetServerEvents extends EventMap {
   listening: []
 }
 
-interface NetServer<M extends NetServerEvents = NetServerEvents>
-  extends EventEmitter<M> {
+interface NetServer<M extends NetServerEvents = NetServerEvents> extends EventEmitter<M> {
   readonly listening: boolean
 
   address(): (PipeServer['address'] & TCPServer['address']) | null
