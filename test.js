@@ -34,6 +34,56 @@ test('tcp', (t) => {
   })
 })
 
+test('tcp, destroy server socket', (t) => {
+  t.plan(5)
+
+  const server = net.createServer((socket) => {
+    socket
+      .on('close', () => {
+        t.pass('server socket closed')
+        server.close(() => t.pass('server closed'))
+      })
+      .destroy()
+  })
+
+  server.listen(0, () => {
+    t.pass('listening')
+
+    const socket = new net.Socket()
+    socket
+      .on('close', () => t.pass('client socket closed'))
+      .connect(server.address().port, () => {
+        t.pass('connected')
+        socket.end() // TODO Without this the test stalls
+      })
+  })
+})
+
+test('tcp, destroy client socket', (t) => {
+  t.plan(5)
+
+  const server = net.createServer((socket) => {
+    socket
+      .on('close', () => {
+        t.pass('server socket closed')
+        server.close(() => t.pass('server closed'))
+      })
+      .end() // TODO Without this the test stalls
+  })
+
+  server.listen(0, () => {
+    t.pass('listening')
+
+    const socket = new net.Socket()
+    socket
+      .on('close', () => t.pass('client socket closed'))
+      .connect(server.address().port, () => {
+        t.pass('connected')
+        socket.destroy()
+      })
+  })
+})
+
 test('ipc', (t) => {
   t.plan(10)
 

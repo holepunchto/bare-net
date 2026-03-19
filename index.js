@@ -141,7 +141,7 @@ exports.Socket = class NetSocket extends Duplex {
   }
 
   _destroy(err, cb) {
-    if (this._socket === null) return cb(null)
+    if (this._socket === null || this._socket.destroyed) return cb(null)
 
     this._socket.destroy(err)
     this._pendingDestroy = cb
@@ -176,7 +176,11 @@ exports.Socket = class NetSocket extends Duplex {
   }
 
   _onclose() {
-    this._continueDestroy()
+    this._continueWrite()
+    this._continueFinal()
+
+    if (this._pendingDestroy) this._continueDestroy()
+    else this.destroy()
   }
 
   _continueOpen() {
