@@ -34,6 +34,12 @@ interface NetSocket<M extends NetSocketEvents = NetSocketEvents> extends Duplex<
   readonly pending: boolean
   readonly timeout?: number
   readonly readyState: 'open' | 'readOnly' | 'writeOnly' | 'opening'
+  readonly localAddress?: string
+  readonly localPort?: number
+  readonly localFamily?: string
+  readonly remoteAddress?: string
+  readonly remotePort?: number
+  readonly remoteFamily?: string
 
   connect: Pipe['connect'] & TCPSocket['connect']
 
