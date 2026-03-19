@@ -44,6 +44,30 @@ exports.Socket = class NetSocket extends Duplex {
     return this._socket === null ? 'opening' : this._socket.readyState
   }
 
+  get localAddress() {
+    return this._socket === null ? undefined : this._socket.localAddress
+  }
+
+  get localPort() {
+    return this._socket === null ? undefined : this._socket.localPort
+  }
+
+  get localFamily() {
+    return this._socket === null ? undefined : this._socket.localFamily
+  }
+
+  get remoteAddress() {
+    return this._socket === null ? undefined : this._socket.remoteAddress
+  }
+
+  get remotePort() {
+    return this._socket === null ? undefined : this._socket.remotePort
+  }
+
+  get remoteFamily() {
+    return this._socket === null ? undefined : this._socket.remoteFamily
+  }
+
   connect(...args) {
     let opts = {}
     let onconnect
