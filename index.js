@@ -21,6 +21,7 @@ exports.Socket = class NetSocket extends Duplex {
     this._pendingOpen = null
     this._pendingWrite = null
     this._pendingFinal = null
+    this._pendingDestroy = null
   }
 
   get connecting() {
@@ -115,6 +116,7 @@ exports.Socket = class NetSocket extends Duplex {
       .on('end', this._onend.bind(this))
       .on('finish', this._onfinish.bind(this))
       .on('drain', this._ondrain.bind(this))
+      .on('close', this._onclose.bind(this))
 
     if (this._state & constants.state.UNREFED) this._socket.unref()
 
@@ -138,8 +140,11 @@ exports.Socket = class NetSocket extends Duplex {
     this._pendingFinal = cb
   }
 
-  _predestroy() {
-    if (this._socket !== null) this._socket.destroy()
+  _destroy(err, cb) {
+    if (this._socket === null) return cb(null)
+
+    this._socket.destroy(err)
+    this._pendingDestroy = cb
   }
 
   _onconnect() {
@@ -170,6 +175,10 @@ exports.Socket = class NetSocket extends Duplex {
     this._continueWrite()
   }
 
+  _onclose() {
+    this._continueDestroy()
+  }
+
   _continueOpen() {
     if (this._pendingOpen === null) return
     const cb = this._pendingOpen
@@ -188,6 +197,13 @@ exports.Socket = class NetSocket extends Duplex {
     if (this._pendingFinal === null) return
     const cb = this._pendingFinal
     this._pendingFinal = null
+    cb(null)
+  }
+
+  _continueDestroy() {
+    if (this._pendingDestroy === null) return
+    const cb = this._pendingDestroy
+    this._pendingDestroy = null
     cb(null)
   }
 }
