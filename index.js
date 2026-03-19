@@ -18,6 +18,7 @@ exports.Socket = class NetSocket extends Duplex {
 
     this._opts = { readBufferSize, allowHalfOpen, eagerOpen }
 
+    this._pendingOpen = null
     this._pendingWrite = null
     this._pendingFinal = null
   }
@@ -108,69 +109,86 @@ exports.Socket = class NetSocket extends Duplex {
 
     this._socket
       .on('connect', this._onconnect.bind(this))
-      .on('error', this._onerror.bind(this))
-      .on('close', this._onclose.bind(this))
-      .on('end', this._onend.bind(this))
-      .on('data', this._ondata.bind(this))
-      .on('drain', this._ondrain.bind(this))
       .on('timeout', this._ontimeout.bind(this))
+      .on('error', this._onerror.bind(this))
+      .on('data', this._ondata.bind(this))
+      .on('end', this._onend.bind(this))
+      .on('finish', this._onfinish.bind(this))
+      .on('drain', this._ondrain.bind(this))
 
     if (this._state & constants.state.UNREFED) this._socket.unref()
+
+    this._continueOpen()
 
     return this
   }
 
+  _open(cb) {
+    if (this._socket !== null) return cb(null)
+    this._pendingOpen = cb
+  }
+
   _write(data, encoding, cb) {
-    if (this._socket !== null && this._socket.write(data)) cb(null)
-    else this._pendingWrite = cb
+    if (this._socket.write(data)) return cb(null)
+    this._pendingWrite = cb
   }
 
   _final(cb) {
-    if (this._socket === null) return cb(null)
-    this._pendingFinal = cb
     this._socket.end()
+    this._pendingFinal = cb
   }
 
   _predestroy() {
-    if (this._socket === null) return
-    this._socket.destroy()
+    if (this._socket !== null) this._socket.destroy()
   }
 
   _onconnect() {
-    this._ondrain() // Flush any pending writes
-
     this.emit('connect')
+  }
+
+  _ontimeout() {
+    this.emit('timeout')
   }
 
   _onerror(err) {
     this.destroy(err)
   }
 
-  _onend() {
-    this.end()
-    if (this._pendingFinal === null) return
-    const cb = this._pendingFinal
-    this._pendingFinal = null
-    cb(null)
-  }
-
-  _onclose() {
-    this.push(null)
-  }
-
   _ondata(data) {
     this.push(data)
   }
 
+  _onend() {
+    this.push(null)
+  }
+
+  _onfinish() {
+    this._continueFinal()
+  }
+
   _ondrain() {
+    this._continueWrite()
+  }
+
+  _continueOpen() {
+    if (this._pendingOpen === null) return
+    const cb = this._pendingOpen
+    this._pendingOpen = null
+    cb(null)
+  }
+
+  _continueWrite() {
     if (this._pendingWrite === null) return
     const cb = this._pendingWrite
     this._pendingWrite = null
     cb(null)
   }
 
-  _ontimeout() {
-    this.emit('timeout')
+  _continueFinal() {
+    if (this._pendingFinal === null) return
+    const cb = this._pendingFinal
+    this._pendingFinal = null
+    cb(null)
   }
 }
 
