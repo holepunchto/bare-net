@@ -1,16 +1,10 @@
 import EventEmitter, { EventMap } from 'bare-events'
 import { Duplex, DuplexEvents } from 'bare-stream'
+import { PipeConnectOptions, PipeServerListenOptions } from 'bare-pipe'
 import {
-  Pipe,
-  PipeServer,
-  createConnection as createPipeConnection,
-  createServer as createPipeServer
-} from 'bare-pipe'
-import {
-  TCPSocket,
-  TCPServer,
-  createConnection as createTCPConnection,
-  createServer as createTCPServer,
+  TCPSocketAddress,
+  TCPSocketConnectOptions,
+  TCPServerListenOptions,
   isIP,
   isIPv4,
   isIPv6
@@ -29,6 +23,8 @@ export interface NetSocketEvents extends DuplexEvents {
   connect: []
 }
 
+export interface NetSocketConnectOptions extends PipeConnectOptions, TCPSocketConnectOptions {}
+
 interface NetSocket<M extends NetSocketEvents = NetSocketEvents> extends Duplex<M> {
   readonly connecting: boolean
   readonly pending: boolean
@@ -41,7 +37,12 @@ interface NetSocket<M extends NetSocketEvents = NetSocketEvents> extends Duplex<
   readonly remotePort?: number
   readonly remoteFamily?: string
 
-  connect: Pipe['connect'] & TCPSocket['connect']
+  connect(path: string, opts?: PipeConnectOptions, onconnect?: () => void): this
+  connect(path: string, onconnect: () => void): this
+  connect(port: number, host?: string, opts?: TCPSocketConnectOptions, onconnect?: () => void): this
+  connect(port: number, host: string, onconnect: () => void): this
+  connect(port: number, onconnect: () => void): this
+  connect(opts: NetSocketConnectOptions, onconnect?: () => void): this
 
   setKeepAlive(enable?: boolean, delay?: number): this
   setKeepAlive(delay: number): this
@@ -67,12 +68,33 @@ export interface NetServerEvents extends EventMap {
   listening: []
 }
 
+export interface NetServerListenOptions extends PipeServerListenOptions, TCPServerListenOptions {}
+
 interface NetServer<M extends NetServerEvents = NetServerEvents> extends EventEmitter<M> {
   readonly listening: boolean
 
-  address(): (PipeServer['address'] & TCPServer['address']) | null
+  address(): string | TCPSocketAddress | null
 
-  listen: PipeServer['listen'] & TCPServer['listen']
+  listen(
+    path: string,
+    backlog?: number,
+    opts?: PipeServerListenOptions,
+    onlistening?: () => void
+  ): this
+  listen(path: string, backlog: number, onlistening: () => void): this
+  listen(path: string, onlistening: () => void): this
+  listen(
+    port?: number,
+    host?: string,
+    backlog?: number,
+    opts?: TCPServerListenOptions,
+    onlistening?: () => void
+  ): this
+  listen(port: number, host: string, backlog: number, onlistening: () => void): this
+  listen(port: number, host: string, onlistening: () => void): this
+  listen(port: number, onlistening: () => void): this
+  listen(onlistening: () => void): this
+  listen(opts: NetServerListenOptions, onlistening?: () => void): this
 
   close(onclose: (err?: Error) => void): this
 
@@ -88,11 +110,34 @@ declare class NetServer {
 export { type NetServer, NetServer as Server }
 
 export function createConnection(
-  ...args: Parameters<typeof createPipeConnection & typeof createTCPConnection>
+  path: string,
+  opts?: NetOptions & PipeConnectOptions,
+  onconnect?: () => void
+): NetSocket
+
+export function createConnection(path: string, onconnect: () => void): NetSocket
+
+export function createConnection(
+  port: number,
+  host?: string,
+  opts?: NetOptions & TCPSocketConnectOptions,
+  onconnect?: () => void
+): NetSocket
+
+export function createConnection(port: number, host: string, onconnect: () => void): NetSocket
+
+export function createConnection(port: number, onconnect: () => void): NetSocket
+
+export function createConnection(
+  opts: NetOptions & NetSocketConnectOptions,
+  onconnect?: () => void
 ): NetSocket
 
 export { createConnection as connect }
 
 export function createServer(
-  ...args: Parameters<typeof createPipeServer & typeof createTCPServer>
+  opts?: NetOptions,
+  onconnection?: (socket: NetSocket) => void
 ): NetServer
+
+export function createServer(onconnection: (socket: NetSocket) => void): NetServer
