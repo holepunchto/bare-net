@@ -10,8 +10,9 @@ import {
   isIPv6
 } from 'bare-tcp'
 import constants from './lib/constants'
+import errors from './lib/errors'
 
-export { constants, isIP, isIPv4, isIPv6 }
+export { constants, errors, isIP, isIPv4, isIPv6 }
 
 export interface NetOptions {
   allowHalfOpen?: boolean

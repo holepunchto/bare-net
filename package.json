@@ -11,6 +11,10 @@
     "./constants": {
       "types": "./lib/constants.d.ts",
       "default": "./lib/constants.js"
+    },
+    "./errors": {
+      "types": "./lib/errors.d.ts",
+      "default": "./lib/errors.js"
     }
   },
   "files": [
