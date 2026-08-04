@@ -3,6 +3,7 @@ const { Duplex } = require('bare-stream')
 const tcp = require('bare-tcp')
 const pipe = require('bare-pipe')
 const constants = require('./lib/constants')
+const errors = require('./lib/errors')
 
 const defaultReadBufferSize = 65536
 
@@ -265,7 +266,7 @@ exports.Server = class NetServer extends EventEmitter {
   }
 
   get listening() {
-    return this._server !== null && this._server.listening
+    return (this._state & constants.state.BOUND) !== 0
   }
 
   address() {
@@ -273,6 +274,10 @@ exports.Server = class NetServer extends EventEmitter {
   }
 
   listen(...args) {
+    if (this._state & constants.state.BINDING || this._state & constants.state.BOUND) {
+      throw errors.SERVER_ALREADY_LISTENING('Server is already listening')
+    }
+
     let opts = {}
     let onlistening
 
@@ -309,6 +314,8 @@ exports.Server = class NetServer extends EventEmitter {
     }
 
     opts = { ...opts, ...this._opts }
+
+    this._state |= constants.state.BINDING
 
     if (opts.path) {
       this._attach(constants.type.IPC, pipe.createServer(opts))
@@ -357,6 +364,9 @@ exports.Server = class NetServer extends EventEmitter {
   }
 
   _onlistening() {
+    this._state |= constants.state.BOUND
+    this._state &= ~constants.state.BINDING
+
     this.emit('listening')
   }
 
@@ -365,15 +375,21 @@ exports.Server = class NetServer extends EventEmitter {
   }
 
   _onerror(err) {
+    this._state &= ~constants.state.BINDING
+
     this.emit('error', err)
   }
 
   _onclose() {
+    this._state &= ~constants.state.BINDING
+    this._state &= ~constants.state.BOUND
+
     this.emit('close')
   }
 }
 
 exports.constants = constants
+exports.errors = errors
 
 exports.isIP = tcp.isIP
 exports.isIPv4 = tcp.isIPv4

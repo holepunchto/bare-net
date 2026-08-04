@@ -112,6 +112,83 @@ test('ipc', (t) => {
   })
 })
 
+test('tcp, listen while listening', (t) => {
+  t.plan(4)
+
+  const server = net.createServer()
+
+  server.listen(0, () => {
+    t.pass('listening')
+
+    const { port } = server.address()
+
+    t.exception(() => server.listen(0), { code: 'SERVER_ALREADY_LISTENING' })
+    t.is(server.address().port, port, 'still bound to the same port')
+
+    server.close(() => t.pass('server closed'))
+  })
+})
+
+test('ipc, listen while listening', (t) => {
+  t.plan(4)
+
+  const server = net.createServer()
+  const path = name()
+
+  server.listen(path, () => {
+    t.pass('listening')
+
+    t.exception(() => server.listen(name()), { code: 'SERVER_ALREADY_LISTENING' })
+    t.is(server.address(), path, 'still bound to the same path')
+
+    server.close(() => t.pass('server closed'))
+  })
+})
+
+test('tcp, listen after close', (t) => {
+  t.plan(5)
+
+  const server = net.createServer()
+
+  server.listen(0, () => {
+    t.pass('listening')
+
+    server.close(() => {
+      t.pass('server closed')
+      t.absent(server.listening, 'not listening')
+
+      server.listen(0, () => {
+        t.pass('listening again')
+
+        server.close(() => t.pass('server closed again'))
+      })
+    })
+  })
+})
+
+test('tcp, listen after failed listen', (t) => {
+  t.plan(4)
+
+  const first = net.createServer()
+
+  first.listen(0, () => {
+    const server = net.createServer()
+
+    server.on('error', (err) => {
+      t.is(err.code, 'EADDRINUSE', 'address in use')
+      t.absent(server.listening, 'not listening')
+
+      server.listen(0, () => {
+        t.pass('listening')
+
+        server.close(() => first.close(() => t.pass('servers closed')))
+      })
+    })
+
+    server.listen(first.address().port)
+  })
+})
+
 function name() {
   const name =
     'bare-pipe-' + Math.random().toString(16).slice(2) + Math.random().toString(16).slice(2)
