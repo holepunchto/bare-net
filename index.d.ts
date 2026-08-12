@@ -16,7 +16,9 @@ export { constants, errors, isIP, isIPv4, isIPv6 }
 
 /** Options accepted when constructing a `NetSocket` or `NetServer`. */
 export interface NetOptions {
-  /** Keep the writable side of the socket open after the readable side ends. Defaults to `false`. */
+  /**
+   * Keep the writable side of the socket open after the readable side ends. Defaults to `false`.
+   */
   allowHalfOpen?: boolean
   /** Open the socket immediately instead of waiting for the first write. Defaults to `false`. */
   eagerOpen?: boolean
@@ -57,7 +59,8 @@ interface NetSocket<M extends NetSocketEvents = NetSocketEvents> extends Duplex<
   /**
    * Connect the socket to a `path` over IPC, or to a `port`/`host` over TCP.
    * @param path - The path to connect to over IPC.
-   * @param opts - Connection options passed to the underlying socket; `path`, `port`, and `host` may be given here instead of as positional arguments.
+   * @param opts - Connection options passed to the underlying socket; `path`, `port`, and `host`
+   * may be given here instead of as positional arguments.
    * @param onconnect - Called once when the socket emits `'connect'`.
    */
   connect(path: string, opts?: PipeConnectOptions, onconnect?: () => void): this
@@ -161,7 +164,8 @@ export { type NetServer, NetServer as Server }
 /**
  * Create a `NetSocket` and connect it over IPC if a `path` is given, otherwise over TCP.
  * @param path - The path to connect to over IPC.
- * @param opts - Options for the socket and connection; if `path` is set the socket connects over IPC, otherwise over TCP.
+ * @param opts - Options for the socket and connection; if `path` is set the socket connects over
+ * IPC, otherwise over TCP.
  * @param onconnect - Called when the connection is established.
  */
 export function createConnection(
@@ -192,7 +196,8 @@ export { createConnection as connect }
 
 /**
  * Create a `NetServer`, optionally registering a `connection` listener.
- * @param opts - Options applied to each accepted socket; `readBufferSize` defaults to `65536`, and `allowHalfOpen` and `pauseOnConnect` to `false`.
+ * @param opts - Options applied to each accepted socket; `readBufferSize` defaults to `65536`, and
+ * `allowHalfOpen` and `pauseOnConnect` to `false`.
  * @param onconnection - Called on each `'connection'` event.
  */
 export function createServer(
