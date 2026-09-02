@@ -20,6 +20,10 @@ const socket = net.createConnection(port)
 socket.write('hello world')
 ```
 
+## API
+
+See the [`bare-net` reference](https://docs.pears.com/reference/bare/modules/bare-net).
+
 ## License
 
 Apache-2.0
